@@ -73,24 +73,22 @@ const currencies = new Map([
 
 // const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 /***********************Movements Elements*****************************************/
+function movement(account){
 containerMovements.innerHTML='';
-let values =account2.movements.map(x =>{
+let values =account.movements.map(x =>{
 let type = x>0?'deposit':'withdrawal';
 return  containerMovements.insertAdjacentHTML('afterbegin',`<div class="movements__row">
 <div class="movements__type movements__type--${type}">${type}</div>
-<div class="movements__date">3 days ago</div>
 <div class="movements__value">${x}₹</div>
 </div>`);
 });
-/*********************************Total Balance Element***************************************************/
-let TotalAmount=account2.movements.reduce(function(a,b){
-  return a+b;
-},0);
-labelBalance.innerHTML=`${TotalAmount}₹`;
+}
 /**************************************In and Out Values**************************************************/
+
+function InandOut(account){
 let positiveArray=[];
 let negativeArray=[];
-account2.movements.forEach((element) => {
+account.movements.forEach((element) => {
   if(element<0){
     negativeArray.push(element);
   }else{
@@ -99,7 +97,7 @@ account2.movements.forEach((element) => {
 });
 let totalPositive =positiveArray.reduce(function(a,b){
       return a+b;
-},0);
+},0); 
 
 labelSumIn.innerHTML=`${totalPositive}₹`;
 
@@ -107,5 +105,55 @@ let totalNegative =negativeArray.reduce(function(a,b){
   return a+b;
 },0);
 labelSumOut.innerHTML=`${totalNegative}₹`;
-/************************************************************************************************/
+//Total Sum
+let TotalAmount=account.movements.reduce(function(a,b){
+  return a+b;
+},0);
+labelBalance.innerHTML=`${TotalAmount}₹`;
+//Interest Values
+const interest =account.movements
+                .filter(x=>x>0)
+                .map(deposit=>((deposit*account.interestRate)/100))
+                .filter((int,i,arr)=>{
+                  return int>=1;
+                })
+                .reduce((a,b) =>a+b,0);
+labelSumInterest.textContent=`${interest}₹`;
+
+};
+/*************************************Conversion Dollar to rupee************************************************/
+const Dollar =72.5;
+let dollarConversion=account2.movements.map(x=>{
+  return x*Dollar;
+});
+/******************************Usernames************************************************/
+function createUserName(accs){
+  let users=accs.forEach(function(acc){
+  acc.username=acc.owner.toLowerCase().split(' ').map(x=>{
+    return x[0];
+    }).join('');
+  });
+  };
+  createUserName(accounts);
+/**********************************Login-Feature*************************************************/
+let currentAccount;
+btnLogin.addEventListener('click',function(e){
+  e.preventDefault();
+ currentAccount =accounts.find(
+   acc=>acc.username===inputLoginUsername.value
+   );
+   if (currentAccount?.pin===Number(inputLoginPin.value)){
+     /*****clear input fields */
+     inputLoginUsername.value=inputLoginPin.value='';
+     inputLoginPin.blur();
+    /**Welcome message***/
+    labelWelcome.textContent=`Welcome ${currentAccount.owner.split(' ')[0]}`
+    /***Shows app after login */
+    containerApp.style.opacity=100;
+    //****In and outs function */
+    InandOut(currentAccount);
+    /******Movements*/
+    movement(currentAccount);
+   }
+});
 /////////////////////////////////////////////////
