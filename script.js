@@ -122,7 +122,7 @@ const interest =account.movements
                 .filter((int,i,arr)=>{
                   return int>=1;
                 })
-                .reduce((a,b) =>a+b,0);
+                .reduce((a,b) =>a+b,0).toFixed(2);
 labelSumInterest.textContent=`${interest}₹`;
 
 };
@@ -174,26 +174,28 @@ function updateUI(acc){
 /*****************Transfer Money from 1 account to another*/
 btnTransfer.addEventListener('click',function(account){
   account.preventDefault();
+  inputTransferAmount.blur();
+    inputTransferTo.blur();
 const amountTransfer=Number(inputTransferAmount.value);
-const receiverAccount=accounts.find(acc=>
+const receiverAccount=accounts.find((acc)=>
   acc.username===inputTransferTo.value); 
   console.log(amountTransfer,receiverAccount);
   if(amountTransfer>0 && currentAccount.balance>=amountTransfer &&
-    receiverAccount &&
-     receiverAccount?.username !==currentAccount.username){
+    receiverAccount 
+    &&receiverAccount?.username !==currentAccount.username){
        //Doing the transfer
     currentAccount.movements.push(-amountTransfer);
     receiverAccount.movements.push(amountTransfer);
     updateUI(currentAccount);
+    
   }
-  inputTransferAmount.blur();
-  inputTransferTo.blur();
+
 });
 console.log(currentAccount);
 /************Request Loan feature ***********/
 btnLoan.addEventListener('click',function(e){
     e.preventDefault();
-    const amount =Number(inputLoanAmount.value);
+    const amount =Math.floor(Number(inputLoanAmount.value));
 if(amount>0 && currentAccount.movements.some(mov =>
   mov>= amount*0.1)){
  currentAccount.movements.push(amount);
